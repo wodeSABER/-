@@ -1,8 +1,5 @@
-# 我将自己的评价分为三个板块
-包括数据库知识的学习，作业与实践课，同学交流与ai使用情况
-
-# 一：知识的学习（18/20分）
-
+# 自我评价
+张子泰 42233009 数据科学与大数据
 ## 第一周：初步了解数据库
 - 在老师和助教的指导下安装了数据库软件DataGrip、Postgres
 ## 第二周：深入了解数据库
@@ -60,6 +57,7 @@ SELECT SUBSTR('Hello World', 7) AS result;       -- 结果: World
 SELECT LEFT('Hello World', 5) AS left_part;      -- 结果: Hello
 SELECT RIGHT('Hello World', 5) AS right_part;    -- 结果: World
 ```
+这些内容掌握不是很好，扣两分
 ## 第六周：NULL 的含义、聚集函数、分组聚集
 ### NULL 的特殊性
 ### NULL 表示"未知"或"不存在"的值，具有以下特点：
@@ -117,6 +115,157 @@ SELECT
 | `BIGSERIAL`   | 1到9,223,372,036,854,775,807 | 8字节 | 超大型表               |
 ## 第十周：函数与过程
 ### 自定义函数和存储过程的编写
-### 这一章学起来比较困难，对自定义函数的理解不够深入，实操也不是很熟练，需要借助ai完成内容，给自己扣了两分
+这一章学起来比较困难，对自定义函数的理解不够深入，实操也不是很熟练，需要借助ai完成内容，给自己扣了两分
 ## 第十一周：SQL注入原理
 ### 学习从外部调用sql，体会到数据库安全的重要性
+- 常用连接方式有：
+  Python: psycopg2 Java: JDBC	高性能，直接连接	需手动防注入
+### SQL注入原理与防护
+- SQL注入典型场景
+```
+-- 危险! 拼接SQL示例
+SELECT * FROM users WHERE username = 'admin'--' AND password = '';
+-- 实际执行(注释掉了密码验证)
+SELECT * FROM users WHERE username = 'admin'
+```
+## 第十二周：ER图
+- 这一章理解的很好，就是关系图，分清实体、属性、联系就好了
+- 把 ER 图转化为关系模式有点难度
+## 第十三周：理论
+### 函数依赖基本概念
+- 函数依赖定义
+
+函数依赖(Functional Dependency, FD)是关系数据库中描述属性间依赖关系的核心概念。记作 X → Y，表示：
+X（决定因素）唯一确定 Y（被决定因素）
+即对于X的每个值，都有唯一的Y值与之对应
+- 范式级别详解
+1. 第一范式(1NF)
+定义：所有属性都是原子性的，不可再分
+
+特点：
+
+每列都是最小数据单元
+
+没有重复的组或数组
+
+每行有唯一标识（主键）
+
+
+2. 第二范式(2NF)
+前提：已满足1NF
+
+定义：消除非主属性对主键的部分函数依赖
+
+判断步骤：
+
+找出所有候选键
+
+检查非主属性是否完全依赖于整个候选键
+
+3. 第三范式(3NF)
+前提：已满足2NF
+
+定义：消除非主属性对主键的传递函数依赖
+
+判断标准：
+
+不存在非主属性A → 非主属性B的情况（除非A是超键）
+
+4. BC范式(BCNF/Boyce-Codd NF)
+强化版3NF：消除所有属性对候选键的传递依赖
+
+判断标准：
+
+对于所有函数依赖X → Y，X必须包含候选键
+
+与3NF的区别：
+
+3NF允许主属性对候选键的传递依赖
+
+BCNF不允许任何属性（包括主属性）对候选键的传递依赖
+## 第十三周、十四周：存储、索引、查询及事务
+### PostgreSQL 核心功能
+
+### 一、存储结构
+
+### 表空间与存储管理
+
+| 对象类型 | 描述 | 存储特性 |
+|---------|------|---------|
+| **表(Table)** | 数据的主要存储形式 | 分为堆文件(Heap File)存储 |
+| **TOAST表** | 处理大字段的附属表 | 自动为超过2KB的字段创建 |
+| **索引** | 加速数据访问的结构 | 与表数据分离存储 |
+| **序列** | 自增序列生成器 | 小型的特殊表结构 |
+
+```sql
+-- 查看表存储空间
+SELECT pg_size_pretty(pg_total_relation_size('table_name'));
+```
+
+### 二、索引类型
+
+### PostgreSQL 主要索引对比
+
+| 索引类型 | 适用场景 | 特点 | 创建语法 |
+|---------|---------|------|---------|
+| **B-tree** | 默认索引，适合范围查询 | 高度平衡树结构 | `CREATE INDEX idx_name ON table(col)` |
+| **Hash** | 等值查询 | 仅支持=操作，无范围查询 | `CREATE INDEX idx_name ON table USING HASH(col)` |
+| **GiST** | 地理数据、全文搜索 | 通用搜索树框架 | `CREATE INDEX idx_name ON table USING GIST(col)` |
+| **GIN** | 多值类型(数组、JSON) | 倒排索引 | `CREATE INDEX idx_name ON table USING GIN(col)` |
+| **BRIN** | 大型表有序数据 | 块范围索引 | `CREATE INDEX idx_name ON table USING BRIN(col)` |
+
+```sql
+-- 创建多列索引
+CREATE INDEX idx_employee_name ON employees(last_name, first_name);
+
+-- 查看索引使用情况
+SELECT * FROM pg_stat_all_indexes WHERE relname = 'table_name';
+```
+
+### 三、查询优化
+
+### 查询执行计划分析
+
+| 执行计划节点 | 描述 | 性能提示 |
+|-------------|------|---------|
+| **Seq Scan** | 全表扫描 | 对大表性能差，考虑加索引 |
+| **Index Scan** | 索引扫描 | 良好的选择性时高效 |
+| **Bitmap Heap Scan** | 位图索引扫描 | 适合多条件组合查询 |
+| **Nested Loop** | 嵌套循环连接 | 小表驱动大表时高效 |
+| **Hash Join** | 哈希连接 | 内存充足时高效 |
+| **Merge Join** | 合并连接 | 已排序数据时最佳 |
+
+```sql
+-- 分析查询计划
+EXPLAIN ANALYZE SELECT * FROM orders WHERE customer_id = 100;
+
+-- 强制使用索引(不推荐生产使用)
+SET enable_seqscan = off;
+```
+
+### 四、事务处理
+
+### 事务特性与隔离级别
+
+| 隔离级别 | 脏读 | 不可重复读 | 幻读 | 描述 |
+|---------|------|-----------|------|------|
+| **Read Uncommitted** | 可能 | 可能 | 可能 | PostgreSQL 实际实现为Read Committed |
+| **Read Committed** | 不可能 | 可能 | 可能 | 默认级别 |
+| **Repeatable Read** | 不可能 | 不可能 | 可能 | 快照隔离 |
+| **Serializable** | 不可能 | 不可能 | 不可能 | 完全串行化 |
+
+```sql
+-- 事务控制示例
+BEGIN;
+  -- SQL语句
+  SAVEPOINT savepoint1;
+  -- 更多SQL
+  ROLLBACK TO savepoint1;
+COMMIT;
+
+-- 设置隔离级别
+BEGIN TRANSACTION ISOLATION LEVEL REPEATABLE READ;
+```
+这一部分内容较多，未能深入理解，扣两分
+## 第十五周：进行了期末复习，开始准备项目
+## 第十六周：完成自我评价
